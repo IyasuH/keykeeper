@@ -1,0 +1,19 @@
+[project]
+name = "keykeeper"
+version = "1.0.0"
+description = "A simple generator and manager tool."
+requires-python = ">=3.8"
+dependencies = [
+	"click>=8.1",
+	"pyperclip>=1.9.0",
+]
+
+[project.scripts]
+keykeeper = "keykeeper:genrate_password"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "keykeeper"
