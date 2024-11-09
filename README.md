@@ -23,7 +23,4 @@
 
 ### Usage
 
-```
-keykeeper --help
-```
-[image](https://imgur.com/4tDz4jj.png)
+![image](https://imgur.com/4tDz4jj.png)
