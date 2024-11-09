@@ -5,7 +5,21 @@
 ### Installation
 
 * Clone this repo
-* Install dependencies in development mode by ``pip install --editable .``
+  * ```
+    git clone https://github.com/IyasuH/keykeeper.git
+    ```
+* Create a virtual environment
+  * ```
+    python3 -m venv env
+    ```
+* Activate the virtual environment
+  * ```
+    source env/bin/activate
+    ```
+* Install dependencies in development mode by
+  * ```
+    pip install --editable .
+    ```
 
 ### Usage
 
