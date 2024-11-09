@@ -6,6 +6,8 @@ import random
 import os
 import uuid
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+import sqlite3
+import datetime
 
 def validate_length(ctx, param, value):
     if value < 0:
@@ -17,7 +19,7 @@ def validate_length(ctx, param, value):
     return value
 
 
-def save_password(password, database_file, site, add_info):
+def save_password(password, conn, site, add_info):
     salt_ = uuid.uuid4().bytes
     kdf = Scrypt(
         salt=salt_,
@@ -27,11 +29,16 @@ def save_password(password, database_file, site, add_info):
         p=1
     )
     hashed_password = kdf.derive(password.encode())
-    # check if there is db connection
-    # save the hash, salt and hash_type to database
+
     click.echo(click.style(f'[DEBUG] password {password}',fg = 'yellow'))
     click.echo(click.style(f'[DEBUG] hashed_password {hashed_password.hex()}',fg = 'yellow'))
-    click.echo(click.style('[INFO] saving password to database', fg = 'cyan'))
+
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS passwords (site TEXT, add_info TEXT, hashed_password TEXT, salt TEXT, created_at TEXT)")
+    cursor.execute("INSERT INTO passwords (site, add_info, hashed_password, salt, created_at) VALUES (?, ?, ?, ?, ?)", (site, add_info, hashed_password.hex(), salt_.hex(), datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")))
+    conn.commit()
+
+    click.echo(click.style('[INFO] password saved to database', fg = 'cyan'))
 
 @click.command()
 @click.option('--length', '-l', default = 15, callback = validate_length, help = 'length of password')
@@ -78,6 +85,11 @@ def genrate_password(length, copy, special, save):
             click.echo(click.style(f'[INFO] Database file {database_file} does not exist', fg = 'cyan'))
             click.echo(click.style('[INFO] Creating database file', fg = 'cyan'))
             open(database_file, 'a').close()
+        
+        conn = sqlite3.connect(database_file)
+        encryption_key = click.prompt('Enter the encryption key for the database', hide_input=True, type=click.STRING)
+        conn.execute(f"PRAGMA key='{encryption_key}'")
+        
         site = click.prompt('Enter the site name', type=click.STRING, default="no site name")
         add_info = click.prompt('Enter any additional info to save to database', type=click.STRING, default="")
-        save_password(password, database_file, site, add_info)
+        save_password(password, conn, site, add_info)
